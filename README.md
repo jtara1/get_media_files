@@ -3,7 +3,7 @@ Python class to return a list of local media files from a folder with metadata o
 
 ## Requirements
 
-* Python (2 or 3)
+* Python 3
 
 #### Modules
 

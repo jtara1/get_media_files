@@ -15,7 +15,7 @@ class GetMediaFiles:
         # Any file with one of the follow MediaInfo "tracks" will be returned
         self.track_types = track_types if track_types else ['Image', 'Video', 'Audio']
 
-    def get_all(self, path=None, track_types=None, sort='st_ctime',
+    def get_all(self, path=None, recursive=False, track_types=None, sort='st_ctime',
                 start_i=0, limit_i=-1, remove_audio=True):
         """
         Utilize pymediainfo to get media tracks, size, duration, & format
@@ -33,7 +33,7 @@ class GetMediaFiles:
         track_types = track_types if track_types else self.track_types
         print('[GetMedia] Getting files with %s in %s' % (track_types, path)) # debug
 
-        files = glob.glob(path + '/*') # get all files (and directories) in path
+        files = glob.glob(path + '/**', recursive=recursive) # get all files (and directories) in path
         limit_i = len(files) if limit_i == -1 else limit_i
         files = files[start_i:limit_i]
         files = [[f] for f in files] # reorganize so we can append data with each file
@@ -125,8 +125,9 @@ class GetMediaFiles:
 # path1 = os.path.join('/home/j/Pictures')
 # path2 = os.path.join(os.getcwd(), 'test-imgs2')
 # path3 = '/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs'
-# media = GetMediaFiles(path=path2, track_types=['Image', 'Video'])
-# files = media.get_all(sort='st_ctime', start_i=0, limit_i=-1)
+# media = GetMediaFiles(path=path1, track_types=['Image', 'Video'])
+# files = media.get_all(recursive=False, sort='st_ctime', start_i=0, limit_i=-1)
 # print('----------------------------')
 # media.print_files(files)
+# print('%s files found.' % len(files))
 # stats = media.get_stats(files)

@@ -21,7 +21,7 @@ class GetMediaFiles:
         Utilize pymediainfo to get media tracks, size, duration, & format
         Returns a list of lists with file info (see readme.md for more details)
 
-        Parameters:
+        Arguments:
             path: folder path containing media files
             track_types: list containg 'Image' or 'Video' or 'Audio' or 'General'
             sort: os.stat(path) returns a tuple, access value from that tuple with sort param
@@ -36,7 +36,7 @@ class GetMediaFiles:
         files = glob.glob(path + '/**', recursive=recursive) # get all files (and directories) in path
         limit_i = len(files) if limit_i == -1 else limit_i
         files = files[start_i:limit_i]
-        files = [[f] for f in files] # reorganize so we can append data with each file
+        files = list([f] for f in files) # reorganize so we can append data with each file
 
         media_types = '|'.join(track_types)
         media_type_regex = re.compile('(' + media_types + ')')
@@ -46,6 +46,8 @@ class GetMediaFiles:
         for f in files:
             # print('f: ' + str(f))
             # print('----')
+
+            # get Media Info of current file
             info = MediaInfo.parse(f[0])
 
             # append track info if it matches that given by track_types
@@ -64,10 +66,11 @@ class GetMediaFiles:
                 remove_indices.append(files.index(f))
                 continue
 
+            # this isn't really necessary to do this
             # get easy to read and access media type at index 2 of each file in files (list)
-            temp_list = [k for k, v in f[1].items()]
-            media_type = '-'.join(temp_list)
-            f.append(media_type)
+            # temp_list = list(k for k, v in f[1].items())
+            # media_type = '-'.join(temp_list)
+            # f.append(media_type)
 
         # remove unwanted files in files list
         for count, index in enumerate(remove_indices):
@@ -106,28 +109,35 @@ class GetMediaFiles:
     def get_stats(self, files, stat_type='st_ctime'):
         """ valid stat_type params https://docs.python.org/3/library/os.html#os.stat_result """
         stats = []
-        for f in files:
-            stats.append(getattr(os.stat(f[0]), stat_type))
-        return stats
+        return list(getattr(os.stat(f[0]), stat_type) for f in files)
+        # for f in files:
+        #     stats.append(getattr(os.stat(f[0]), stat_type))
+        # return stats
 
     def attach_stats(self, files, stat_type='st_ctime'):
         """ mutate files with os.stat(path).stat_type """
         stats = self.get_stats(files, stat_type=stat_type)
-        files = [f.append(stat) for f, stat in zip(files, stats)]
+        files = list(f.append(stat) for f, stat in zip(files, stats))
 
     def print_files(self, files):
         for f in files:
             print(f)
 
 
-# # tests
-#
-# path1 = os.path.join('/home/j/Pictures')
-# path2 = os.path.join(os.getcwd(), 'test-imgs2')
-# path3 = '/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs'
-# media = GetMediaFiles(path=path1, track_types=['Image', 'Video'])
-# files = media.get_all(recursive=False, sort='st_ctime', start_i=0, limit_i=-1)
-# print('----------------------------')
-# media.print_files(files)
-# print('%s files found.' % len(files))
-# stats = media.get_stats(files)
+if __name__ == "__main__":
+    # # tests
+    import time
+    init_t = time.time()
+    # path1 = os.path.join('/home/j/Pictures')
+    # path2 = os.path.join(os.getcwd(), 'test-imgs2')
+    # path3 = '/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs'
+    path4 = '/home/j/Pictures/James\'s Wallpapers/'
+
+    path5 = '/home/j/Pictures/lots of media/'
+    media = GetMediaFiles(path=path5, track_types=['Image', 'Video'])
+    files = media.get_all(recursive=True, sort='st_ctime', start_i=0, limit_i=-1)
+    print('----------------------------')
+    # media.print_files(files)
+    print('%s files found.' % len(files))
+    print('%i seconds passed' % int(time.time() - init_t))
+    # stats = media.get_stats(files)

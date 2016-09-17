@@ -76,6 +76,10 @@ class GetMediaFiles:
         for count, index in enumerate(remove_indices):
             files.remove(files[index - count])
 
+        # return if we don't care about sorting by creation date or attaching creation date data
+        if not sort:
+            return files
+
         # attach stats (mutates files) then sort files
         self.attach_stats(files, stat_type=sort)
         files = sorted(files, key=itemgetter(-1))

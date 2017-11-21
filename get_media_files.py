@@ -1,13 +1,15 @@
 import re
 import os
-import PIL.Image
 import glob
-# import itertools # itertools.izip(...) is Python 2 only
 from operator import attrgetter, itemgetter
 from pymediainfo import MediaInfo
+import time
+import click
 
 
 class GetMediaFiles:
+    media_info_dll_location = "C:\\Program Files\\MediaInfo\\MediaInfo.dll"
+
     def __init__(self, path=os.path.basename(os.path.abspath(__file__)),
                  track_types=None):
         """
@@ -58,7 +60,13 @@ class GetMediaFiles:
         remove_indices = []
         for f in files:
             # get Media Info of current file
-            info = MediaInfo.parse(f[0])
+            try:
+                info = MediaInfo.parse(f[0])
+            except OSError:
+                info = MediaInfo.parse(
+                    f[0],
+                    library_file=GetMediaFiles.media_info_dll_location
+                )
 
             # append track info if it matches that given by track_types
             f.append({track.track_type: {
@@ -119,7 +127,9 @@ class GetMediaFiles:
         return files
 
     def get_stats(self, files, stat_type='st_ctime'):
-        """ valid stat_type params https://docs.python.org/3/library/os.html#os.stat_result """
+        """valid stat_type params
+        https://docs.python.org/3/library/os.html#os.stat_result
+        """
         stats = []
         return list(getattr(os.stat(f[0]), stat_type) for f in files)
         # for f in files:
@@ -137,9 +147,7 @@ class GetMediaFiles:
 
 
 if __name__ == "__main__":
-    # # tests
-    import time
-    import click
+    # tests
     init_t = time.time()
 
     @click.command()
@@ -147,14 +155,15 @@ if __name__ == "__main__":
     @click.option('-r', '--recursive', default=False)
     @click.option('-t', '--track-types', default=['Image', 'Vide', 'Audio'])
     def main(folder, recursive, track_types):
+        # from pymediainfo import
         media = GetMediaFiles(path=folder, track_types=track_types)
-        files = media.get_all(recursive=recursive, sort='st_ctime', start_i=0, limit_i=-1)
+        files = media.get_all(recursive=recursive, sort='st_ctime',
+                              start_i=0, limit_i=-1)
         print('----------------------------')
         # media.print_files(files)
         print('%s files found.' % len(files))
         print('%i seconds passed' % int(time.time() - init_t))
         media.print_files(files)
-
         # stats = media.get_stats(files)
 
     main()

@@ -8,6 +8,7 @@ Python class to return a list of local media files from a folder with metadata o
 #### Modules
 
 * pymediainfo
+* click
 
 #### Dependencies
 

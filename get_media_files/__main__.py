@@ -1,20 +1,26 @@
 import re
 import os
 import glob
-from operator import attrgetter, itemgetter
+from operator import itemgetter
 from pymediainfo import MediaInfo
 import time
 import click
+from pprint import pformat
 
 
 class GetMediaFiles:
     media_info_dll_location = "C:\\Program Files\\MediaInfo\\MediaInfo.dll"
 
-    def __init__(self, path=os.path.basename(os.path.abspath(__file__)),
-                 track_types=None):
+    def __init__(self, path=os.path.dirname(os.path.abspath(__file__)),
+                 track_types=('Video', 'Audio', 'Image', 'General')):
+        """Returns sorted list of files from param path
+        
+        :param path: the path containing file(s)
+        :param track_types: tuple or list of strings of the file types we
+            want to get information on; only valid strings are 'Video', 
+            'Audio', 'Image', 'General' 
         """
-        Returns sorted list of files from param path
-        """
+        self.files = None  # list containing information on files
         self.path = path
         # Any file with one of the follow MediaInfo "tracks" will be returned
         self.track_types = track_types if track_types \
@@ -23,21 +29,20 @@ class GetMediaFiles:
     def get_all(self, path=None, recursive=False,
                 track_types=None, sort='st_ctime', sort_reverse=False,
                 start_i=0, limit_i=-1, remove_audio=False):
-        """
-        Utilize pymediainfo to get media tracks, size, duration, & format
+        """Utilize pymediainfo to get media tracks, size, duration, & format
         Returns a list of lists with file info (see readme.md for more details)
 
-        Arguments:
-            path: folder path containing media files
-            recursive: get files inside of folders inside of folders ...
-            track_types: list containg 'Image' or 'Video' or 'Audio' or 
-                'General'
-            sort: os.stat(path) returns a tuple, access value 
-                from that tuple with sort param
-            sort_reverse: Reverse after sorting
-            start_i: start index to begin getting files at
-            limit_i: end index to stop getting files before
-            remove_audio: removes files that are audio only if True (redundant)
+        :param path: folder path containing media files
+        :param recursive: get files inside of folders inside of folders ...
+        :param track_types: list containg 'Image' or 'Video' or 'Audio' or 
+            'General'
+        :param sort: os.stat(path) returns a tuple, access value 
+            from that tuple with sort param
+        :param sort_reverse: Reverse after sorting
+        :param start_i: start index to begin getting files at
+        :param limit_i: end index to stop getting files before
+        :param remove_audio: removes files that are audio only if True 
+            (redundant)
         """
         path = path if path else self.path
         track_types = track_types if track_types else self.track_types
@@ -76,7 +81,7 @@ class GetMediaFiles:
                         }
                         for track in info.tracks
                         if re.match(media_type_regex, str(track.track_type))
-                    })
+                     })
 
             # remove if folder, non media, or audio
             if (len(f) == 1 or f[1] == {}) or \
@@ -95,55 +100,32 @@ class GetMediaFiles:
             return files
 
         # attach stats (mutates files) then sort files
-        self.attach_stats(files, stat_type=sort)
-        files = sorted(files, key=itemgetter(-1), reverse=sort_reverse)
+        self.files = files
+        self.attach_stats(stat_type=sort)
+        self.files = sorted(files, key=itemgetter(-1), reverse=sort_reverse)
 
-        return files
+        return self.files
 
-    def get_all_old(self, path=None, file_types=None, sort='st_ctime',
-                    start_i=None, limit_i=None):
-        """
-        Returns list of files in path (or self.path) with an extension from
-        the list from file_types, and sorts files by sort param given
-        BUG: FAILS TO RETURN MEDIA FILE(S) WITHOUT ANY FILE EXTENSION
-        """
-        path = path if path else self.path
-        file_types = file_types if file_types else [
-            '.png', '.jpe?g', '.webm', '.mp4', '.gif'
-        ]
-        # debug
-        print('[GetMedia] Getting files with %s in %s' % (file_types, path))
-
-        ftypes = '|'.join(file_types)  # format for regex match group
-        file_match_regex = re.compile('.*?(' + ftypes + ')')
-        files = glob.glob(path + '/*.*')  # get all files in path
-        files = [[f] for f in files if re.match(file_match_regex, f)]
-
-        # attach stats then sort files
-        files = sorted(self.attach_stats(files, stat_type=sort),
-                       key=itemgetter(1))
-        # files = self.attach_size(files)
-
-        return files
-
-    def get_stats(self, files, stat_type='st_ctime'):
-        """valid stat_type params
+    def get_stats(self, stat_type='st_ctime'):
+        """Valid stat_type params
         https://docs.python.org/3/library/os.html#os.stat_result
         """
-        stats = []
-        return list(getattr(os.stat(f[0]), stat_type) for f in files)
-        # for f in files:
-        #     stats.append(getattr(os.stat(f[0]), stat_type))
-        # return stats
+        if self.files is None:
+            print("[get_media_files] Warning: attempted to get_stats before"
+                  " method get_files was called")
+            return []
+        return list(getattr(os.stat(f[0]), stat_type) for f in self.files)
 
-    def attach_stats(self, files, stat_type='st_ctime'):
-        """ mutate files with os.stat(path).stat_type """
-        stats = self.get_stats(files, stat_type=stat_type)
-        files = list(f.append(stat) for f, stat in zip(files, stats))
+    def attach_stats(self, stat_type='st_ctime'):
+        """Mutate files with os.stat(path).stat_type"""
+        stats = self.get_stats(stat_type=stat_type)
+        self.files = list(f.append(stat) for f, stat in zip(self.files, stats))
 
-    def print_files(self, files):
-        for f in files:
-            print(f)
+    def __str__(self):
+        string = ''
+        for f in self.get_all() if self.files is None else self.files:
+            string += pformat(f) + '\n'
+        return string
 
 
 if __name__ == "__main__":
@@ -153,7 +135,7 @@ if __name__ == "__main__":
     @click.command()
     @click.argument('folder')
     @click.option('-r', '--recursive', default=False)
-    @click.option('-t', '--track-types', default=['Image', 'Vide', 'Audio'])
+    @click.option('-t', '--track-types', default=['Image', 'Video', 'Audio'])
     def main(folder, recursive, track_types):
         # from pymediainfo import
         media = GetMediaFiles(path=folder, track_types=track_types)
@@ -163,7 +145,7 @@ if __name__ == "__main__":
         # media.print_files(files)
         print('%s files found.' % len(files))
         print('%i seconds passed' % int(time.time() - init_t))
-        media.print_files(files)
+        print(media)
         # stats = media.get_stats(files)
 
     main()

@@ -13,7 +13,7 @@ def get_install_requirements():
 if __name__ == "__main__":
     pass
 
-setup(name='GetMediaFiles',
+setup(name='get_media_files',
       version='v0.1',
       description='Wrapper for pymediainfo that retrieves information such as'
                   'media type, duration, resolution, etc. from media files',

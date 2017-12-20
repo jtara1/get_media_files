@@ -2,7 +2,7 @@ from distutils.core import setup
 import re
 
 
-version = '0.1.2'
+version = '0.1.3'
 module_name = 'get_media_files'
 github_url = 'https://github.com/jtara1/{}'.format(module_name)
 with open('README.rst') as f:

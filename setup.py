@@ -2,7 +2,7 @@ from distutils.core import setup
 import re
 
 
-version = '0.1.1'
+version = '0.1.2'
 
 
 def get_install_requirements():

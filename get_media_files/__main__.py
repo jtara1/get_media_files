@@ -25,10 +25,11 @@ class GetMediaFiles:
         # Any file with one of the follow MediaInfo "tracks" will be returned
         self.track_types = track_types if track_types \
             else ['Image', 'Video', 'Audio']
+        self.get_info()
 
-    def get_all(self, path=None, recursive=False,
-                track_types=None, sort='st_ctime', sort_reverse=False,
-                start_i=0, limit_i=-1, remove_audio=False):
+    def get_info(self, path=None, recursive=False,
+                 track_types=None, sort='st_ctime', sort_reverse=False,
+                 start_i=0, limit_i=-1, remove_audio=False):
         """Utilize pymediainfo to get media tracks, size, duration, & format
         Returns a list of lists with file info (see readme.md for more details)
 
@@ -47,7 +48,8 @@ class GetMediaFiles:
         path = path if path else self.path
         track_types = track_types if track_types else self.track_types
         # debug
-        print('[GetMedia] Getting files with %s in %s' % (track_types, path))
+        print('[get_media_files] Getting files with %s in %s'
+              % (track_types, path))
 
         # get all files (and directories) in path
         files = glob.glob(os.path.join(path, '**'), recursive=recursive)
@@ -101,35 +103,35 @@ class GetMediaFiles:
 
         # attach stats (mutates files) then sort files
         self.files = files
-        self.attach_stats(stat_type=sort)
+        self._attach_stats(stat_type=sort)
         self.files = sorted(files, key=itemgetter(-1), reverse=sort_reverse)
 
         return self.files
 
-    def get_stats(self, stat_type='st_ctime'):
+    def _get_stats(self, stat_type='st_ctime'):
         """Valid stat_type params
         https://docs.python.org/3/library/os.html#os.stat_result
         """
         if self.files is None:
             print("[get_media_files] Warning: attempted to get_stats before"
-                  " method get_files was called")
+                  " method get_info was called")
             return []
         return list(getattr(os.stat(f[0]), stat_type) for f in self.files)
 
-    def attach_stats(self, stat_type='st_ctime'):
+    def _attach_stats(self, stat_type='st_ctime'):
         """Mutate files with os.stat(path).stat_type"""
-        stats = self.get_stats(stat_type=stat_type)
+        stats = self._get_stats(stat_type=stat_type)
         self.files = list(f.append(stat) for f, stat in zip(self.files, stats))
 
     def __str__(self):
-        string = ''
-        for f in self.get_all() if self.files is None else self.files:
-            string += pformat(f) + '\n'
-        return string
+        if self.files is None:
+            print("[get_media_files] Warning: attempted to print before"
+                  " method get_info was called")
+            return "[]"
+        return pformat(self.files)
 
 
 if __name__ == "__main__":
-    # tests
     init_t = time.time()
 
     @click.command()
@@ -137,15 +139,12 @@ if __name__ == "__main__":
     @click.option('-r', '--recursive', default=False)
     @click.option('-t', '--track-types', default=['Image', 'Video', 'Audio'])
     def main(folder, recursive, track_types):
-        # from pymediainfo import
         media = GetMediaFiles(path=folder, track_types=track_types)
-        files = media.get_all(recursive=recursive, sort='st_ctime',
-                              start_i=0, limit_i=-1)
+        files = media.get_info(recursive=recursive, sort='st_ctime',
+                               start_i=0, limit_i=-1)
         print('----------------------------')
-        # media.print_files(files)
         print('%s files found.' % len(files))
         print('%i seconds passed' % int(time.time() - init_t))
         print(media)
-        # stats = media.get_stats(files)
 
     main()

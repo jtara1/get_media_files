@@ -1,4 +1,4 @@
-# GetMediaFiles
+# get_media_files
 Python class to return a list of local media files from a folder with metadata of the files
 
 ## Requirements
@@ -20,7 +20,7 @@ Python class to return a list of local media files from a folder with metadata o
 
     * glob.glob(...) converts '/' to some codes or different type of codec
 
-## GetMediaFiles.GetMediaFiles
+## get_media_files.\_\_main\_\_
 
 Description: Returns list of files with data & file path of each file in its own list sorted by
 creation/metadata change time (oldest to newest (ascending order)) by default
@@ -35,26 +35,23 @@ Suppose I have 2 image files, test2.jpg and test3.jpg, 1 text file, and 1 folder
 
 run the following code:
 
-    from GetMediaFiles import GetMediaFiles
+    from get_media_files import GetMediaFiles
 
     path = '/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs'
-
-    media = GetMediaFiles()
-
-    files = media.get_all(path, track_types=['Image','Video'])
-
-    media.print_files(files)
+    media = GetMediaFiles(path)
+    info = media.get_info(path, track_types=['Image','Video'])
+    print(info)
 
 
 printed output:
 
-    ['/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs/test2.jpg',
+    [['/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs/test2.jpg',
     {'Image':
         {'duration': None, 'format': 'JPEG', 'size': (1920, 1080)}},
     'Image',
-    1473055449.7858396]
+    1473055449.7858396],
     ['/home/j/Documents/_Github-Projects/MediaToVideo/temp-imgs/test3.jpg',
     {'Image':
         {'duration': None, 'format': 'JPEG', 'size': (291, 1080)}},
     'Image',
-    1473055449.921839]
+    1473055449.921839]]

@@ -3,7 +3,7 @@ import re
 from os.path import join, dirname
 
 
-version = '0.1.3'
+version = '0.1.4'
 module_name = 'get_media_files'
 github_url = 'https://github.com/jtara1/{}'.format(module_name)
 with open(join(dirname(__file__), 'README.rst')) as f:

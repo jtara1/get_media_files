@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import re
 from os.path import join, dirname, basename
 
@@ -13,7 +13,7 @@ version = '0.1.5'
 github_user = 'jtara1'
 author = 'James T'
 author_email = 'jtara@tuta.io'
-description = 'description_needed_from_dev'  # brief module description
+description = 'Get info such as duration, type, or resolution on local files'
 # ------------------------------------------------------------- #
 
 github_url = 'https://github.com/{}/{}'.format(github_user, module_name)
@@ -42,7 +42,8 @@ def get_install_requirements():
 
 
 setup(name=module_name,
-      packages=[module_name],
+      # packages=[module_name],
+      packages=find_packages(),
       version=version,
       description=description,
       long_description=readme,

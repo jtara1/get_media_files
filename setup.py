@@ -42,7 +42,6 @@ def get_install_requirements():
 
 
 setup(name=module_name,
-      # packages=[module_name],
       packages=find_packages(),
       version=version,
       description=description,

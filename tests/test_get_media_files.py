@@ -1,5 +1,5 @@
 import sys
-from os.path import join, dirname
+from os.path import join, dirname, abspath
 __file_path = dirname(__file__)
 sys.path.append(join(__file_path, '..'))
 
@@ -7,30 +7,38 @@ from get_media_files import GetMediaFiles
 
 
 media_dir = join(__file_path, 'media')
+media = GetMediaFiles(media_dir)  # GetMediaFiles object
 
 
-def test():
-    expected_data = [
-     ['tests/media/about.txt',
-      {'General': {'duration': None, 'format': None, 'size': (None, None)}},
-      1513722595.3195267],
-     ['tests/media/044838940-mountain-range-and-lake-2006-a.jpg',
-      {'General': {'duration': None, 'format': 'JPEG', 'size': (None, None)},
-       'Image': {'duration': None, 'format': 'JPEG', 'size': (800, 536)}},
-      1513722595.3235266],
-     ['tests/media/044837513-two-women-walking-hill-1930s-v.jpg',
-      {'General': {'duration': None, 'format': 'JPEG', 'size': (None, None)},
-       'Image': {'duration': None, 'format': 'JPEG', 'size': (1024, 772)}},
-      1513722595.3275266],
-     ['tests/media/045844231-my-mother.wav',
-      {'Audio': {'duration': 12863, 'format': 'PCM', 'size': (None, None)},
-       'General': {'duration': 12863, 'format': 'Wave', 'size': (None, None)}},
-      1513722595.3315265]
-    ]
-    media = GetMediaFiles(media_dir)
+def test_data():
     print(media)
+
+    expected_data = [
+        [abspath('tests/media/about.txt'),
+         {'General': {'duration': None, 'format': None, 'size': (None, None)}},
+         1513722595.3195267],
+        [abspath('tests/media/044838940-mountain-range-and-lake-2006-a.jpg'),
+         {'General': {'duration': None, 'format': 'JPEG',
+                      'size': (None, None)},
+          'Image': {'duration': None, 'format': 'JPEG', 'size': (800, 536)}},
+         1513722595.3235266],
+        [abspath('tests/media/044837513-two-women-walking-hill-1930s-v.jpg'),
+         {'General': {'duration': None, 'format': 'JPEG',
+                      'size': (None, None)},
+          'Image': {'duration': None, 'format': 'JPEG', 'size': (1024, 772)}},
+         1513722595.3275266],
+        [abspath('tests/media/045844231-my-mother.wav'),
+         {'Audio': {'duration': 12863, 'format': 'PCM', 'size': (None, None)},
+          'General': {'duration': 12863, 'format': 'Wave',
+                      'size': (None, None)}},
+         1513722595.3315265]
+    ]
     assert(expected_data == media.files)
 
 
+def test_length():
+    assert (len(media) == 4)
+
+
 if __name__ == '__main__':
-    test()
+    test_data()

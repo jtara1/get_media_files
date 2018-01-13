@@ -130,6 +130,9 @@ class GetMediaFiles:
             return "[]"
         return pformat(self.files)
 
+    def __len__(self):
+        return len(self.files)
+
 
 if __name__ == "__main__":
     init_t = time.time()
@@ -146,5 +149,6 @@ if __name__ == "__main__":
         print('%s files found.' % len(files))
         print('%i seconds passed' % int(time.time() - init_t))
         print(media)
+        print(len(media))
 
     main()

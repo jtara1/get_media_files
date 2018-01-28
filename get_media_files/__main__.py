@@ -51,13 +51,17 @@ class GetMediaFiles:
         print('[get_media_files] Getting files with %s in %s'
               % (track_types, path))
 
-        # get all files (and directories) in path
-        files = glob.glob(os.path.join(path, '**'), recursive=recursive)
-        limit_i = len(files) if limit_i == -1 else limit_i
-        files = files[start_i:limit_i]
+        # individual file was given as path
+        if os.path.isfile(path):
+            files = [[path]]
+        else:
+            # get all files (and directories) in path
+            files = glob.glob(os.path.join(path, '**'), recursive=recursive)
+            limit_i = len(files) if limit_i == -1 else limit_i
+            files = files[start_i:limit_i]
 
-        # reorganize so we can append data with each file
-        files = list([f] for f in files)
+            # reorganize so we can append data with each file
+            files = list([f] for f in files)
 
         # e.g.: '(Audio|Video|Image)'
         media_types = '|'.join(track_types)

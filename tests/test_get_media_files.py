@@ -37,7 +37,22 @@ def test_data():
 
 
 def test_length():
-    assert (len(media) == 4)
+    assert(len(media) == 4)
+
+
+def test_data_of_individual_file():
+    expected_data = [
+        [abspath('tests/media/044837513-two-women-walking-hill-1930s-v.jpg'),
+         {'General': {'size': (None, None),
+                      'format': 'JPEG', 'duration': None},
+          'Image': {'size': (1024, 772), 'format': 'JPEG', 'duration': None}},
+         1513722595.3275266]
+    ]
+
+    media_file = join(media_dir,
+                      '044837513-two-women-walking-hill-1930s-v.jpg')
+    media2 = GetMediaFiles(media_file)
+    assert(media2.get_info() == expected_data)
 
 
 if __name__ == '__main__':

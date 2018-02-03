@@ -25,7 +25,6 @@ class GetMediaFiles:
         # Any file with one of the follow MediaInfo "tracks" will be returned
         self.track_types = track_types if track_types \
             else ['Image', 'Video', 'Audio']
-        self.get_info()
 
     def get_info(self, path=None, recursive=False,
                  track_types=None, sort='st_ctime', sort_reverse=False,
@@ -138,21 +137,20 @@ class GetMediaFiles:
         return len(self.files)
 
 
-if __name__ == "__main__":
+@click.command()
+@click.argument('folder')
+@click.option('-r', '--recursive', default=False)
+@click.option('-t', '--track-types', default=['Image', 'Video', 'Audio'])
+def main(folder, recursive, track_types):
     init_t = time.time()
+    media = GetMediaFiles(path=folder, track_types=track_types)
+    files = media.get_info(recursive=recursive, sort='st_ctime',
+                           start_i=0, limit_i=-1)
+    print('----------------------------')
+    print('%s files found.' % len(files))
+    print('%i seconds passed' % int(time.time() - init_t))
+    print(media)
 
-    @click.command()
-    @click.argument('folder')
-    @click.option('-r', '--recursive', default=False)
-    @click.option('-t', '--track-types', default=['Image', 'Video', 'Audio'])
-    def main(folder, recursive, track_types):
-        media = GetMediaFiles(path=folder, track_types=track_types)
-        files = media.get_info(recursive=recursive, sort='st_ctime',
-                               start_i=0, limit_i=-1)
-        print('----------------------------')
-        print('%s files found.' % len(files))
-        print('%i seconds passed' % int(time.time() - init_t))
-        print(media)
-        print(len(media))
 
+if __name__ == "__main__":
     main()

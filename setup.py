@@ -113,7 +113,7 @@ setup(use_scm_version={'root': directory},
       # include this if you want this module to have a command line interface
       entry_points={
           'console_scripts':
-              ['gmf={}.__main__:main'.format(module_name)]},
+              ['gmf={}.__main__:main'.format(module_name.replace('-', '_'))]},
       install_requires=get_install_requirements(),
       # list of strs https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[]

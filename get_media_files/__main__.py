@@ -139,13 +139,14 @@ class GetMediaFiles:
 
 @click.command()
 @click.argument('folder')
-@click.option('-r', '--recursive', default=False)
+@click.option('-r', '--recursive', default=False, is_flag=True)
 @click.option('-t', '--track-types', default=['Image', 'Video', 'Audio'])
-def main(folder, recursive, track_types):
+@click.option('-rev', '--reverse', default=False, is_flag=True)
+def main(folder, recursive, track_types, reverse):
     init_t = time.time()
     media = GetMediaFiles(path=folder, track_types=track_types)
     files = media.get_info(recursive=recursive, sort='st_ctime',
-                           start_i=0, limit_i=-1)
+                           sort_reverse=reverse, start_i=0, limit_i=-1)
     print('----------------------------')
     print('%s files found.' % len(files))
     print('%i seconds passed' % int(time.time() - init_t))
